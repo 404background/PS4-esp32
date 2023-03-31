@@ -7,7 +7,8 @@
 /*                            L O C A L    T Y P E S */
 /********************************************************************************/
 
-enum ps4_packet_index {
+enum ps4_packet_index
+{
   packet_index_analog_stick_lx = 13,
   packet_index_analog_stick_ly = 14,
   packet_index_analog_stick_rx = 15,
@@ -23,7 +24,8 @@ enum ps4_packet_index {
   packet_index_status = 42
 };
 
-enum ps4_button_mask {
+enum ps4_button_mask
+{
   button_mask_up = 0,
   button_mask_right = 0b00000010,
   button_mask_down = 0b00000100,
@@ -56,22 +58,31 @@ enum ps4_button_mask {
   button_mask_touchpad = 0b10
 };
 
-enum ps4_status_mask {
+enum ps4_status_mask
+{
   ps4_status_mask_battery = 0b00001111,
   ps4_status_mask_charging = 0b00010000,
   ps4_status_mask_audio = 0b00100000,
   ps4_status_mask_mic = 0b01000000,
 };
+enum ps4_index_sensor_accelerometer
+{
+  packet_index_sensor_accelerometer_x = 0,
+  packet_index_sensor_accelerometer_y = 0,
+  packet_index_sensor_accelerometer_z = 0,
+  packet_index_sensor_gyroscope_z = 0,
+};
+
 
 /********************************************************************************/
 /*              L O C A L    F U N C T I O N     P R O T O T Y P E S */
 /********************************************************************************/
 
-ps4_sensor_t parsePacketSensor(uint8_t* packet);
-ps4_status_t parsePacketStatus(uint8_t* packet);
-ps4_analog_stick_t parsePacketAnalogStick(uint8_t* packet);
-ps4_analog_button_t parsePacketAnalogButton(uint8_t* packet);
-ps4_button_t parsePacketButtons(uint8_t* packet);
+ps4_sensor_t parsePacketSensor(uint8_t *packet);
+ps4_status_t parsePacketStatus(uint8_t *packet);
+ps4_analog_stick_t parsePacketAnalogStick(uint8_t *packet);
+ps4_analog_button_t parsePacketAnalogButton(uint8_t *packet);
+ps4_button_t parsePacketButtons(uint8_t *packet);
 ps4_event_t parseEvent(ps4_t prev, ps4_t cur);
 
 /********************************************************************************/
@@ -86,13 +97,14 @@ static ps4_event_callback_t ps4_event_cb = NULL;
 /********************************************************************************/
 void parserSetEventCb(ps4_event_callback_t cb) { ps4_event_cb = cb; }
 
-void parsePacket(uint8_t* packet) {
+void parsePacket(uint8_t *packet)
+{
   ps4_t prev_ps4 = ps4;
 
   ps4.button = parsePacketButtons(packet);
   ps4.analog.stick = parsePacketAnalogStick(packet);
   ps4.analog.button = parsePacketAnalogButton(packet);
-  // ps4.sensor = parsePacketSensor(packet);
+  ps4.sensor = parsePacketSensor(packet);
   ps4.status = parsePacketStatus(packet);
   ps4.latestPacket = packet;
 
@@ -108,7 +120,8 @@ void parsePacket(uint8_t* packet) {
 /******************/
 /*    E V E N T   */
 /******************/
-ps4_event_t parseEvent(ps4_t prev, ps4_t cur) {
+ps4_event_t parseEvent(ps4_t prev, ps4_t cur)
+{
   ps4_event_t ps4Event;
 
   /* Button down events */
@@ -180,7 +193,8 @@ ps4_event_t parseEvent(ps4_t prev, ps4_t cur) {
 /********************/
 /*    A N A L O G   */
 /********************/
-ps4_analog_stick_t parsePacketAnalogStick(uint8_t* packet) {
+ps4_analog_stick_t parsePacketAnalogStick(uint8_t *packet)
+{
   ps4_analog_stick_t ps4AnalogStick;
 
   const uint8_t offset = 128;
@@ -193,7 +207,8 @@ ps4_analog_stick_t parsePacketAnalogStick(uint8_t* packet) {
   return ps4AnalogStick;
 }
 
-ps4_analog_button_t parsePacketAnalogButton(uint8_t* packet) {
+ps4_analog_button_t parsePacketAnalogButton(uint8_t *packet)
+{
   ps4_analog_button_t ps4AnalogButton;
 
   ps4AnalogButton.l2 = packet[packet_index_analog_l2];
@@ -206,7 +221,8 @@ ps4_analog_button_t parsePacketAnalogButton(uint8_t* packet) {
 /*   B U T T O N S   */
 /*********************/
 
-ps4_button_t parsePacketButtons(uint8_t* packet) {
+ps4_button_t parsePacketButtons(uint8_t *packet)
+{
   ps4_button_t ps4_button;
   uint8_t frontBtnData = packet[packet_index_button_standard];
   uint8_t extraBtnData = packet[packet_index_button_extra];
@@ -247,7 +263,8 @@ ps4_button_t parsePacketButtons(uint8_t* packet) {
 /*******************************/
 /*   S T A T U S   F L A G S   */
 /*******************************/
-ps4_status_t parsePacketStatus(uint8_t* packet) {
+ps4_status_t parsePacketStatus(uint8_t *packet)
+{
   ps4_status_t ps4Status;
 
   ps4Status.battery = packet[packet_index_status] & ps4_status_mask_battery;
@@ -261,19 +278,20 @@ ps4_status_t parsePacketStatus(uint8_t* packet) {
 /********************/
 /*   S E N S O R S  */
 /********************/
-ps4_sensor_t parsePacketSensor(uint8_t* packet) {
+ps4_sensor_t parsePacketSensor(uint8_t *packet)
+{
   ps4_sensor_t ps4Sensor;
-  /*
-      const uint16_t offset = 0x200;
 
-      ps4Sensor.accelerometer.x = (packet[packet_index_sensor_accelerometer_x] << 8) +
-     packet[packet_index_sensor_accelerometer_x+1] - offset;
-      ps4Sensor.accelerometer.y = (packet[packet_index_sensor_accelerometer_y] << 8) +
-     packet[packet_index_sensor_accelerometer_y+1] - offset;
-      ps4Sensor.accelerometer.z = (packet[packet_index_sensor_accelerometer_z] << 8) +
-     packet[packet_index_sensor_accelerometer_z+1] - offset;
-      ps4Sensor.gyroscope.z     = (packet[packet_index_sensor_gyroscope_z]
-     << 8) + packet[packet_index_sensor_gyroscope_z+1]     - offset;
-  */
+  const uint16_t offset = 0x200;
+
+  ps4Sensor.accelerometer.x = (packet[packet_index_sensor_accelerometer_x] << 8) +
+                              packet[packet_index_sensor_accelerometer_x + 1] - offset;
+  ps4Sensor.accelerometer.y = (packet[packet_index_sensor_accelerometer_y] << 8) +
+                              packet[packet_index_sensor_accelerometer_y + 1] - offset;
+  ps4Sensor.accelerometer.z = (packet[packet_index_sensor_accelerometer_z] << 8) +
+                              packet[packet_index_sensor_accelerometer_z + 1] - offset;
+  ps4Sensor.gyroscope.z = (packet[packet_index_sensor_gyroscope_z] << 8) +
+                          packet[packet_index_sensor_gyroscope_z + 1] - offset;
+
   return ps4Sensor;
 }
